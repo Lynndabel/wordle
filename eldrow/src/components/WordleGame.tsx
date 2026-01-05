@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 
+import { getDailyWord } from "../lib/dailyWord";
+
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
-const DAILY_WORD = 'CRANE'; // Placeholder, replace with daily logic
+const DAILY_WORD = getDailyWord();
 
 function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 'gray'> {
   const feedback: Array<'green' | 'yellow' | 'gray'> = Array(WORD_LENGTH).fill('gray');
