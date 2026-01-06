@@ -3,9 +3,9 @@
 ## Project TODO Checklist
 
 ### 1. Game Design & Logic
-- [ ] Implement Wordle game logic (daily word, guesses, feedback)
-- [ ] UI for entering guesses and showing results
-- [ ] Word list management (daily rotation)
+- [x] Implement Wordle game logic (daily word, guesses, feedback)
+- [x] UI for entering guesses and showing results
+- [x] Word list management (daily rotation)
 
 ### 2. Streak & User Tracking
 - [ ] Onchain streak tracking smart contract (Base)
