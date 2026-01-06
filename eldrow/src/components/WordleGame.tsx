@@ -34,30 +34,100 @@ function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 
   return feedback;
 }
 
+import { getWordleStreakContract } from "../lib/wordleStreakContract";
+import { ethers } from "ethers";
+
 export default function WordleGame() {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState('');
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
+  const [streak, setStreak] = useState<{current: number, max: number, lastPlayed: number} | null>(null);
+  const [wallet, setWallet] = useState<ethers.BrowserProvider | null>(null);
+  const [account, setAccount] = useState<string>('');
+  const [txStatus, setTxStatus] = useState<string>('');
+
+  React.useEffect(() => {
+    if (window.ethereum) {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      setWallet(provider);
+      provider.send("eth_accounts", []).then((accounts) => {
+        if (accounts.length > 0) setAccount(accounts[0]);
+      });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (wallet && account) {
+      const contract = getWordleStreakContract(wallet);
+      contract.getStreak(account).then(([current, max, lastPlayed]: any) => {
+        setStreak({ current: Number(current), max: Number(max), lastPlayed: Number(lastPlayed) });
+      });
+    }
+  }, [wallet, account]);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentGuess(e.target.value.toUpperCase());
   };
 
-  const handleGuess = () => {
+  const handleGuess = async () => {
     if (currentGuess.length !== WORD_LENGTH) return;
     const newGuesses = [...guesses, currentGuess];
     setGuesses(newGuesses);
     setCurrentGuess('');
     if (currentGuess === DAILY_WORD) {
       setStatus('won');
+      // On win, call contract
+      if (wallet && account) {
+        const signer = await wallet.getSigner();
+        const contract = getWordleStreakContract(signer);
+        setTxStatus('Submitting streak...');
+        try {
+          const tx = await contract.guessToday(true);
+          await tx.wait();
+          setTxStatus('Streak updated!');
+        } catch (e) {
+          setTxStatus('Error submitting streak');
+        }
+      }
     } else if (newGuesses.length >= MAX_GUESSES) {
       setStatus('lost');
+      // On loss, call contract with false
+      if (wallet && account) {
+        const signer = await wallet.getSigner();
+        const contract = getWordleStreakContract(signer);
+        setTxStatus('Submitting play...');
+        try {
+          const tx = await contract.guessToday(false);
+          await tx.wait();
+          setTxStatus('Play submitted!');
+        } catch (e) {
+          setTxStatus('Error submitting play');
+        }
+      }
+    }
+  };
+
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const accounts = await provider.send("eth_accounts", []);
+      setAccount(accounts[0]);
+      setWallet(provider);
     }
   };
 
   return (
     <div className="wordle-game">
       <h2 className="mb-4 text-xl font-bold">Wordle Game</h2>
+      {account ? (
+        <div className="mb-2 text-sm text-green-700">Connected: {account}</div>
+      ) : (
+        <button onClick={connectWallet} className="mb-2 px-3 py-1 bg-blue-600 text-white rounded">Connect Wallet</button>
+      )}
+      {streak && (
+        <div className="mb-2 text-sm">Streak: {streak.current} | Max: {streak.max}</div>
+      )}
       <div className="space-y-2 mb-4">
         {[...Array(MAX_GUESSES)].map((_, idx) => {
           const guess = guesses[idx] || '';
@@ -87,7 +157,7 @@ export default function WordleGame() {
           );
         })}
       </div>
-      {status === 'playing' && (
+      {account && status === 'playing' && (
         <div className="flex justify-center space-x-2 mb-2">
           <input
             maxLength={WORD_LENGTH}
@@ -108,6 +178,7 @@ export default function WordleGame() {
       )}
       {status === 'won' && <div className="text-green-600 font-bold text-lg">🎉 You won!</div>}
       {status === 'lost' && <div className="text-red-600 font-bold text-lg">Game over! The word was {DAILY_WORD}.</div>}
+      {txStatus && <div className="mt-2 text-sm text-blue-600">{txStatus}</div>}
     </div>
   );
 }
