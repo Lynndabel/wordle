@@ -37,8 +37,11 @@ function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 
 import { getWordleStreakContract } from "../lib/wordleStreakContract";
 import { ethers } from "ethers";
 
+import { useMiniApp } from "@neynar/react";
+
 export default function WordleGame() {
   const [guesses, setGuesses] = useState<string[]>([]);
+  const { context } = useMiniApp();
   const [currentGuess, setCurrentGuess] = useState('');
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [streak, setStreak] = useState<{current: number, max: number, lastPlayed: number} | null>(null);
@@ -47,8 +50,8 @@ export default function WordleGame() {
   const [txStatus, setTxStatus] = useState<string>('');
 
   React.useEffect(() => {
-    if (window.ethereum) {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+    if (globalThis.window?.ethereum) {
+      const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
       setWallet(provider);
       provider.send("eth_accounts", []).then((accounts) => {
         if (accounts.length > 0) setAccount(accounts[0]);
@@ -87,6 +90,7 @@ export default function WordleGame() {
           setTxStatus('Streak updated!');
         } catch (e) {
           setTxStatus('Error submitting streak');
+          console.error(e);
         }
       }
     } else if (newGuesses.length >= MAX_GUESSES) {
@@ -102,14 +106,15 @@ export default function WordleGame() {
           setTxStatus('Play submitted!');
         } catch (e) {
           setTxStatus('Error submitting play');
+          console.error(e);
         }
       }
     }
   };
 
   const connectWallet = async () => {
-    if (window.ethereum) {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+    if (globalThis.window?.ethereum) {
+      const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
       await provider.send("eth_requestAccounts", []);
       const accounts = await provider.send("eth_accounts", []);
       setAccount(accounts[0]);
@@ -120,6 +125,11 @@ export default function WordleGame() {
   return (
     <div className="wordle-game">
       <h2 className="mb-4 text-xl font-bold">Wordle Game</h2>
+      {context?.user && (
+        <div className="mb-2 text-sm text-purple-700">
+          Farcaster: {context.user.displayName || context.user.username} (FID: {context.user.fid})
+        </div>
+      )}
       {account ? (
         <div className="mb-2 text-sm text-green-700">Connected: {account}</div>
       ) : (
@@ -178,6 +188,27 @@ export default function WordleGame() {
       )}
       {status === 'won' && <div className="text-green-600 font-bold text-lg">🎉 You won!</div>}
       {status === 'lost' && <div className="text-red-600 font-bold text-lg">Game over! The word was {DAILY_WORD}.</div>}
+      {(status === 'won' || status === 'lost') && (
+        <button
+          className="mt-3 px-4 py-2 bg-purple-600 text-white rounded"
+          onClick={async () => {
+            const castActions = (context as any)?.actions;
+            if (castActions?.cast) {
+              const resultMsg = status === 'won'
+                ? `I solved today's Wordle! My streak: ${streak?.current || 1}`
+                : `Tried today's Wordle. The word was ${DAILY_WORD}. Try to beat my streak!`;
+              await castActions.cast({ text: resultMsg });
+            } else if ((globalThis.window as any)?.farcaster) {
+              // fallback: try window.farcaster if available
+              (globalThis.window as any).farcaster.cast?.({ text: `Wordle result: ${status}` });
+            } else {
+              alert("Farcaster cast action not available in this context.");
+            }
+          }}
+        >
+          Share to Farcaster
+        </button>
+      )}
       {txStatus && <div className="mt-2 text-sm text-blue-600">{txStatus}</div>}
     </div>
   );
