@@ -37,8 +37,11 @@ function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 
 import { getWordleStreakContract } from "../lib/wordleStreakContract";
 import { ethers } from "ethers";
 
+import { useMiniApp } from "@neynar/react";
+
 export default function WordleGame() {
   const [guesses, setGuesses] = useState<string[]>([]);
+  const { context } = useMiniApp();
   const [currentGuess, setCurrentGuess] = useState('');
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [streak, setStreak] = useState<{current: number, max: number, lastPlayed: number} | null>(null);
@@ -120,6 +123,11 @@ export default function WordleGame() {
   return (
     <div className="wordle-game">
       <h2 className="mb-4 text-xl font-bold">Wordle Game</h2>
+      {context?.user && (
+        <div className="mb-2 text-sm text-purple-700">
+          Farcaster: {context.user.displayName || context.user.username} (FID: {context.user.fid})
+        </div>
+      )}
       {account ? (
         <div className="mb-2 text-sm text-green-700">Connected: {account}</div>
       ) : (
