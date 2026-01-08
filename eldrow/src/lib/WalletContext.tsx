@@ -4,45 +4,89 @@ import { ethers } from "ethers";
 interface WalletContextType {
   wallet: ethers.BrowserProvider | null;
   account: string;
+  isConnecting: boolean;
+  error: string | null;
   connectWallet: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType>({
   wallet: null,
   account: "",
+  isConnecting: false,
+  error: null,
   connectWallet: async () => {},
 });
 
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [wallet, setWallet] = useState<ethers.BrowserProvider | null>(null);
   const [account, setAccount] = useState<string>("");
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (globalThis.window?.ethereum) {
       const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
       setWallet(provider);
-      provider.send("eth_accounts", []).then((accounts) => {
-        if (accounts.length > 0) setAccount(accounts[0]);
+      provider.send("eth_accounts", []).then(async (accounts) => {
+        try {
+          if (accounts.length > 0) {
+            const signer = await provider.getSigner();
+            const addr = await signer.getAddress();
+            setAccount(addr);
+          }
+        } catch (e) {
+          // ignore on load
+        }
       });
     }
   }, []);
 
   const connectWallet = async () => {
+    setIsConnecting(true);
+    setError(null);
     try {
-      if (globalThis.window?.ethereum) {
-        const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const accounts = await provider.send("eth_accounts", []);
-        setAccount(accounts[0]);
-        setWallet(provider);
+      if (!globalThis.window?.ethereum) {
+        throw new Error("No injected wallet found. Please install MetaMask or another EVM wallet.");
       }
-    } catch (err) {
-      alert("Wallet connection failed: " + (err as Error).message);
+      const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      let accounts = await provider.send("eth_accounts", []);
+
+      // Fallback: request permissions if no accounts returned
+      if (!accounts || accounts.length === 0) {
+        try {
+          await (globalThis.window.ethereum as any).request({
+            method: 'wallet_requestPermissions',
+            params: [{ eth_accounts: {} }],
+          });
+          accounts = await provider.send("eth_accounts", []);
+        } catch (permErr) {
+          throw permErr as Error;
+        }
+      }
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No accounts available. Create or import an account in your wallet and try again.");
+      }
+
+      const signer = await provider.getSigner();
+      const addr = await signer.getAddress();
+      setAccount(addr);
+      setWallet(provider);
+
+      // Touch the network to ensure provider is ready
+      await provider.getNetwork();
+    } catch (err: any) {
+      const msg = err?.message || String(err);
+      setError(msg);
+      alert("Wallet connection failed: " + msg);
+    } finally {
+      setIsConnecting(false);
     }
   };
 
   return (
-    <WalletContext.Provider value={{ wallet, account, connectWallet }}>
+    <WalletContext.Provider value={{ wallet, account, isConnecting, error, connectWallet }}>
       {children}
     </WalletContext.Provider>
   );
