@@ -36,28 +36,18 @@ function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 
 
 import { getWordleStreakContract } from "../lib/wordleStreakContract";
 import { ethers } from "ethers";
-
+import { useWallet } from "../lib/WalletContext";
 import { useMiniApp } from "@neynar/react";
 
 export default function WordleGame() {
   const [guesses, setGuesses] = useState<string[]>([]);
   const { context } = useMiniApp();
+  const { wallet, account, connectWallet } = useWallet();
   const [currentGuess, setCurrentGuess] = useState('');
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [streak, setStreak] = useState<{current: number, max: number, lastPlayed: number} | null>(null);
-  const [wallet, setWallet] = useState<ethers.BrowserProvider | null>(null);
-  const [account, setAccount] = useState<string>('');
   const [txStatus, setTxStatus] = useState<string>('');
 
-  React.useEffect(() => {
-    if (globalThis.window?.ethereum) {
-      const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
-      setWallet(provider);
-      provider.send("eth_accounts", []).then((accounts) => {
-        if (accounts.length > 0) setAccount(accounts[0]);
-      });
-    }
-  }, []);
 
   React.useEffect(() => {
     if (wallet && account) {
@@ -112,15 +102,6 @@ export default function WordleGame() {
     }
   };
 
-  const connectWallet = async () => {
-    if (globalThis.window?.ethereum) {
-      const provider = new ethers.BrowserProvider(globalThis.window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const accounts = await provider.send("eth_accounts", []);
-      setAccount(accounts[0]);
-      setWallet(provider);
-    }
-  };
 
   return (
     <div className="wordle-game">
