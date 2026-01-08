@@ -12,6 +12,8 @@ const WagmiProvider = dynamic(
   }
 );
 
+import { WalletProvider } from "../lib/WalletContext";
+
 export function Providers({
   children,
 }: {
@@ -20,16 +22,18 @@ export function Providers({
   const solanaEndpoint =
     process.env.SOLANA_RPC_ENDPOINT || 'https://solana-rpc.publicnode.com';
   return (
-    <WagmiProvider>
-      <MiniAppProvider
-        analyticsEnabled={ANALYTICS_ENABLED}
-        backButtonEnabled={true}
-        returnUrl={RETURN_URL}
-      >
-        <SafeFarcasterSolanaProvider endpoint={solanaEndpoint}>
-          {children}
-        </SafeFarcasterSolanaProvider>
-      </MiniAppProvider>
-    </WagmiProvider>
+    <WalletProvider>
+      <WagmiProvider>
+        <MiniAppProvider
+          analyticsEnabled={ANALYTICS_ENABLED}
+          backButtonEnabled={true}
+          returnUrl={RETURN_URL}
+        >
+          <SafeFarcasterSolanaProvider endpoint={solanaEndpoint}>
+            {children}
+          </SafeFarcasterSolanaProvider>
+        </MiniAppProvider>
+      </WagmiProvider>
+    </WalletProvider>
   );
 }
