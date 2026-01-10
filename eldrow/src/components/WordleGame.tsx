@@ -46,16 +46,68 @@ export default function WordleGame() {
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [streak, setStreak] = useState<{current: number, max: number, lastPlayed: number} | null>(null);
   const [txStatus, setTxStatus] = useState<string>('');
+  const [guessesLeft, setGuessesLeft] = useState<number | null>(null);
+  const [wonToday, setWonToday] = useState<boolean>(false);
+  const [isOnBase, setIsOnBase] = useState<boolean>(true);
 
 
-  React.useEffect(() => {
-    if (wallet && account) {
+  // Refresh onchain status (streak, guessesLeft, wonToday) and check chain
+  const refreshStatus = React.useCallback(async () => {
+    if (!wallet || !account) return;
+    try {
+      const network = await wallet.getNetwork();
+      // Base mainnet chainId = 8453 (0x2105)
+      setIsOnBase(Number(network.chainId) === 8453);
+    } catch {}
+    try {
       const contract = getWordleStreakContract(wallet);
-      contract.getStreak(account).then(([current, max, lastPlayed]: any) => {
-        setStreak({ current: Number(current), max: Number(max), lastPlayed: Number(lastPlayed) });
-      });
+      const [streakTuple, left, won] = await Promise.all([
+        contract.getStreak(account),
+        contract.guessesLeft(account),
+        contract.hasWonToday(account),
+      ]);
+      const [current, max, lastPlayed] = streakTuple as any;
+      setStreak({ current: Number(current), max: Number(max), lastPlayed: Number(lastPlayed) });
+      setGuessesLeft(Number(left));
+      setWonToday(Boolean(won));
+    } catch (e) {
+      console.debug('refreshStatus error', e);
     }
   }, [wallet, account]);
+
+  React.useEffect(() => {
+    refreshStatus();
+  }, [refreshStatus]);
+
+  // Switch to Base network
+  const switchToBase = async () => {
+    try {
+      await (globalThis.window as any)?.ethereum?.request?.({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x2105' }], // 8453
+      });
+      await refreshStatus();
+    } catch (err: any) {
+      // If the chain is not added, request add
+      if (err?.code === 4902) {
+        try {
+          await (globalThis.window as any)?.ethereum?.request?.({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x2105',
+              chainName: 'Base',
+              nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+              rpcUrls: ['https://mainnet.base.org'],
+              blockExplorerUrls: ['https://basescan.org'],
+            }],
+          });
+          await refreshStatus();
+        } catch (e) {
+          console.error('add chain failed', e);
+        }
+      }
+    }
+  };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentGuess(e.target.value.toUpperCase());
@@ -63,6 +115,9 @@ export default function WordleGame() {
 
   const handleGuess = async () => {
     if (currentGuess.length !== WORD_LENGTH) return;
+    if (!isOnBase) return; // guard
+    if (wonToday) return;  // already won today
+    if (guessesLeft !== null && guessesLeft <= 0) return; // no attempts left
     const newGuesses = [...guesses, currentGuess];
     setGuesses(newGuesses);
     setCurrentGuess('');
@@ -77,6 +132,7 @@ export default function WordleGame() {
           const tx = await contract.guessToday(true);
           await tx.wait();
           setTxStatus('Streak updated!');
+          await refreshStatus();
         } catch (e) {
           setTxStatus('Error submitting streak');
           console.error(e);
@@ -93,6 +149,7 @@ export default function WordleGame() {
           const tx = await contract.guessToday(false);
           await tx.wait();
           setTxStatus('Play submitted!');
+          await refreshStatus();
         } catch (e) {
           setTxStatus('Error submitting play');
           console.error(e);
@@ -131,16 +188,16 @@ export default function WordleGame() {
                 const char = guess[i] || '';
                 const color =
                   feedback[i] === 'green'
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-green-500'
                     : feedback[i] === 'yellow'
-                    ? 'bg-yellow-400 text-white'
+                    ? 'bg-yellow-400'
                     : char
-                    ? 'bg-gray-400 text-white'
+                    ? 'bg-gray-300'
                     : 'bg-gray-200';
                 return (
                   <span
                     key={i}
-                    className={`inline-block w-10 h-10 text-2xl font-bold text-center align-middle leading-10 rounded ${color}`}
+                    className={`inline-block w-10 h-10 text-2xl font-bold text-center align-middle leading-10 rounded text-black ${color}`}
                   >
                     {char}
                   </span>
