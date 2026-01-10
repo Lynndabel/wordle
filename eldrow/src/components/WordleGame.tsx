@@ -188,16 +188,16 @@ export default function WordleGame() {
                 const char = guess[i] || '';
                 const color =
                   feedback[i] === 'green'
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-green-500'
                     : feedback[i] === 'yellow'
-                    ? 'bg-yellow-400 text-white'
+                    ? 'bg-yellow-400'
                     : char
-                    ? 'bg-gray-400 text-white'
+                    ? 'bg-gray-300'
                     : 'bg-gray-200';
                 return (
                   <span
                     key={i}
-                    className={`inline-block w-10 h-10 text-2xl font-bold text-center align-middle leading-10 rounded ${color}`}
+                    className={`inline-block w-10 h-10 text-2xl font-bold text-center align-middle leading-10 rounded text-black ${color}`}
                   >
                     {char}
                   </span>
