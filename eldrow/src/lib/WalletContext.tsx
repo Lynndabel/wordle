@@ -35,7 +35,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             setAccount(addr);
           }
         } catch (e) {
-          // ignore on load
+          // ignore on load, but log for debugging
+          console.debug("wallet init signer error", e);
         }
       });
     }
@@ -55,13 +56,13 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Fallback: request permissions if no accounts returned
       if (!accounts || accounts.length === 0) {
         try {
-          await (globalThis.window.ethereum as any).request({
+          await (globalThis.window as any)?.ethereum?.request({
             method: 'wallet_requestPermissions',
             params: [{ eth_accounts: {} }],
           });
           accounts = await provider.send("eth_accounts", []);
-        } catch (permErr) {
-          throw permErr as Error;
+        } catch (error_) {
+          throw error_ as Error;
         }
       }
 

@@ -35,14 +35,13 @@ function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 
 }
 
 import { getWordleStreakContract } from "../lib/wordleStreakContract";
-import { ethers } from "ethers";
 import { useWallet } from "../lib/WalletContext";
 import { useMiniApp } from "@neynar/react";
 
 export default function WordleGame() {
   const [guesses, setGuesses] = useState<string[]>([]);
   const { context } = useMiniApp();
-  const { wallet, account, connectWallet } = useWallet();
+  const { wallet, account, connectWallet, isConnecting, error } = useWallet();
   const [currentGuess, setCurrentGuess] = useState('');
   const [status, setStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [streak, setStreak] = useState<{current: number, max: number, lastPlayed: number} | null>(null);
@@ -114,8 +113,11 @@ export default function WordleGame() {
       {account ? (
         <div className="mb-2 text-sm text-green-700">Connected: {account}</div>
       ) : (
-        <button onClick={connectWallet} className="mb-2 px-3 py-1 bg-blue-600 text-white rounded">Connect Wallet</button>
+        <button onClick={connectWallet} disabled={isConnecting} className="mb-2 px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50">
+          {isConnecting ? 'Connecting…' : 'Connect Wallet'}
+        </button>
       )}
+      {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
       {streak && (
         <div className="mb-2 text-sm">Streak: {streak.current} | Max: {streak.max}</div>
       )}
