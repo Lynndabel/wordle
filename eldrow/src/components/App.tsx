@@ -16,9 +16,9 @@ export enum Tab {
   Wallet = "wallet",
 }
 
-export interface AppProps {
+export type AppProps = Readonly<{
   title?: string;
-}
+}>;
 
 /**
  * App component serves as the main container for the mini app interface.
