@@ -80,7 +80,7 @@ export default function WordleGame() {
         contract.guessesLeft(account),
         contract.hasWonToday(account),
       ]);
-      const [current, max, lastPlayed] = streakTuple as any;
+      const [current, max, lastPlayed] = streakTuple;
       setStreak({ current: Number(current), max: Number(max), lastPlayed: Number(lastPlayed) });
       setGuessesLeft(Number(left));
       setWonToday(Boolean(won));
