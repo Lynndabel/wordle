@@ -7,10 +7,10 @@ const MAX_GUESSES = 6;
 const DAILY_WORD = getDailyWord();
 
 function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 'gray'> {
-  const feedback: Array<'green' | 'yellow' | 'gray'> = Array(WORD_LENGTH).fill('gray');
+  const feedback: Array<'green' | 'yellow' | 'gray'> = new Array(WORD_LENGTH).fill('gray');
   const answerArr = answer.split('');
   const guessArr = guess.split('');
-  const used = Array(WORD_LENGTH).fill(false);
+  const used = new Array(WORD_LENGTH).fill(false);
 
   // First pass: green for correct position
   for (let i = 0; i < WORD_LENGTH; i++) {
@@ -80,7 +80,7 @@ export default function WordleGame() {
         contract.guessesLeft(account),
         contract.hasWonToday(account),
       ]);
-      const [current, max, lastPlayed] = streakTuple as any;
+      const [current, max, lastPlayed] = streakTuple;
       setStreak({ current: Number(current), max: Number(max), lastPlayed: Number(lastPlayed) });
       setGuessesLeft(Number(left));
       setWonToday(Boolean(won));
@@ -127,6 +127,22 @@ export default function WordleGame() {
     setCurrentGuess(e.target.value.toUpperCase());
   };
 
+  const submitResult = async (won: boolean) => {
+    if (!wallet || !account) return;
+    const signer = await wallet.getSigner();
+    const contract = getWordleStreakContract(signer);
+    setTxStatus(won ? 'Submitting streak...' : 'Submitting play...');
+    try {
+      const tx = await contract.guessToday(won);
+      await tx.wait();
+      setTxStatus(won ? 'Streak updated!' : 'Play submitted!');
+      await refreshStatus();
+    } catch (e) {
+      setTxStatus(won ? 'Error submitting streak' : 'Error submitting play');
+      console.error(e);
+    }
+  };
+
   const handleGuess = async () => {
     if (currentGuess.length !== WORD_LENGTH) return;
     if (!isOnBase) return; // guard
@@ -139,35 +155,15 @@ export default function WordleGame() {
       setStatus('won');
       // On win, call contract
       if (wallet && account) {
-        const signer = await wallet.getSigner();
-        const contract = getWordleStreakContract(signer);
-        setTxStatus('Submitting streak...');
-        try {
-          const tx = await contract.guessToday(true);
-          await tx.wait();
-          setTxStatus('Streak updated!');
-          await refreshStatus();
-        } catch (e) {
-          setTxStatus('Error submitting streak');
-          console.error(e);
-        }
+        await submitResult(true);
       }
-    } else if (newGuesses.length >= MAX_GUESSES) {
+      return;
+    }
+    if (newGuesses.length >= MAX_GUESSES) {
       setStatus('lost');
       // On loss, call contract with false
       if (wallet && account) {
-        const signer = await wallet.getSigner();
-        const contract = getWordleStreakContract(signer);
-        setTxStatus('Submitting play...');
-        try {
-          const tx = await contract.guessToday(false);
-          await tx.wait();
-          setTxStatus('Play submitted!');
-          await refreshStatus();
-        } catch (e) {
-          setTxStatus('Error submitting play');
-          console.error(e);
-        }
+        await submitResult(false);
       }
     }
   };
