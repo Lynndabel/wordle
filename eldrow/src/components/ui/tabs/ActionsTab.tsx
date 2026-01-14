@@ -177,10 +177,14 @@ export function ActionsTab() {
 
       {/* Haptic feedback controls */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          htmlFor="haptic-intensity"
+        >
           Haptic Intensity
         </label>
         <select
+          id="haptic-intensity"
           value={selectedHapticIntensity}
           onChange={(e) =>
             setSelectedHapticIntensity(
