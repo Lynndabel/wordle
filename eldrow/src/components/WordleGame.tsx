@@ -186,14 +186,14 @@ export default function WordleGame() {
             <div key={idx} className="flex justify-center space-x-1">
               {[...Array(WORD_LENGTH)].map((_, i) => {
                 const char = guess[i] || '';
-                const color =
-                  feedback[i] === 'green'
-                    ? 'bg-green-500'
-                    : feedback[i] === 'yellow'
-                    ? 'bg-yellow-400'
-                    : char
-                    ? 'bg-gray-300'
-                    : 'bg-gray-200';
+                let color: string = 'bg-gray-200';
+                if (feedback[i] === 'green') {
+                  color = 'bg-green-500';
+                } else if (feedback[i] === 'yellow') {
+                  color = 'bg-yellow-400';
+                } else if (char) {
+                  color = 'bg-gray-300';
+                }
                 return (
                   <span
                     key={i}
