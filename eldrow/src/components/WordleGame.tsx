@@ -51,6 +51,20 @@ export default function WordleGame() {
   const [isOnBase, setIsOnBase] = useState<boolean>(true);
 
 
+  // Stable keys for rows and cells to avoid using array indices as React keys
+  const rowKeysRef = React.useRef<string[]>(
+    Array.from({ length: MAX_GUESSES }, () =>
+      (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2))
+    )
+  );
+  const cellKeysRef = React.useRef<string[][]>(
+    rowKeysRef.current.map(() =>
+      Array.from({ length: WORD_LENGTH }, () =>
+        (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2))
+      )
+    )
+  );
+
   // Refresh onchain status (streak, guessesLeft, wonToday) and check chain
   const refreshStatus = React.useCallback(async () => {
     if (!wallet || !account) return;
@@ -183,7 +197,7 @@ export default function WordleGame() {
           const guess = guesses[idx] || '';
           const feedback = guess ? getFeedback(guess, DAILY_WORD) : [];
           return (
-            <div key={idx} className="flex justify-center space-x-1">
+            <div key={rowKeysRef.current[idx]} className="flex justify-center space-x-1">
               {Array.from({ length: WORD_LENGTH }).map((_, i) => {
                 const char = guess[i] || '';
                 let color: string = 'bg-gray-200';
@@ -196,7 +210,7 @@ export default function WordleGame() {
                 }
                 return (
                   <span
-                    key={i}
+                    key={cellKeysRef.current[idx][i]}
                     className={`inline-block w-10 h-10 text-2xl font-bold text-center align-middle leading-10 rounded text-black ${color}`}
                   >
                     {char}
