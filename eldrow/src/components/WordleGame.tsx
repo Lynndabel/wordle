@@ -7,10 +7,10 @@ const MAX_GUESSES = 6;
 const DAILY_WORD = getDailyWord();
 
 function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 'gray'> {
-  const feedback: Array<'green' | 'yellow' | 'gray'> = Array(WORD_LENGTH).fill('gray');
+  const feedback: Array<'green' | 'yellow' | 'gray'> = new Array(WORD_LENGTH).fill('gray');
   const answerArr = answer.split('');
   const guessArr = guess.split('');
-  const used = Array(WORD_LENGTH).fill(false);
+  const used = new Array(WORD_LENGTH).fill(false);
 
   // First pass: green for correct position
   for (let i = 0; i < WORD_LENGTH; i++) {
