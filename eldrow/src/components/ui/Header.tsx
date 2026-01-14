@@ -12,7 +12,7 @@ type HeaderProps = {
   } | null;
 };
 
-export function Header({ neynarUser }: HeaderProps) {
+export function Header({ neynarUser }: Readonly<HeaderProps>) {
   const { context } = useMiniApp();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
