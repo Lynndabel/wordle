@@ -179,12 +179,12 @@ export default function WordleGame() {
         <div className="mb-2 text-sm">Streak: {streak.current} | Max: {streak.max}</div>
       )}
       <div className="space-y-2 mb-4">
-        {[...new Array(MAX_GUESSES)].map((_, idx) => {
+        {Array.from({ length: MAX_GUESSES }).map((_, idx) => {
           const guess = guesses[idx] || '';
           const feedback = guess ? getFeedback(guess, DAILY_WORD) : [];
           return (
             <div key={idx} className="flex justify-center space-x-1">
-              {[...new Array(WORD_LENGTH)].map((_, i) => {
+              {Array.from({ length: WORD_LENGTH }).map((_, i) => {
                 const char = guess[i] || '';
                 let color: string = 'bg-gray-200';
                 if (feedback[i] === 'green') {
