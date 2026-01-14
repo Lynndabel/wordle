@@ -49,9 +49,7 @@ export interface AppProps {
  * <App title="My Mini App" />
  * ```
  */
-export default function App(
-  { title }: AppProps = { title: "Neynar Starter Kit" }
-) {
+export default function App({ title = "Neynar Starter Kit" }: AppProps) {
   // --- Hooks ---
   const {
     isSDKLoaded,
