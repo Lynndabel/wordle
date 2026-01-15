@@ -16,9 +16,9 @@ export enum Tab {
   Wallet = "wallet",
 }
 
-export interface AppProps {
+export type AppProps = Readonly<{
   title?: string;
-}
+}>;
 
 /**
  * App component serves as the main container for the mini app interface.
@@ -49,9 +49,7 @@ export interface AppProps {
  * <App title="My Mini App" />
  * ```
  */
-export default function App(
-  { title }: AppProps = { title: "Neynar Starter Kit" }
-) {
+export default function App({ title = "Neynar Starter Kit" }: AppProps) {
   // --- Hooks ---
   const {
     isSDKLoaded,
