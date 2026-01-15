@@ -24,7 +24,7 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="my-4 p-4 bg-gray-50 rounded shadow">
+    <div className="my-4 p-4 bg-gray-10 rounded shadow">
       <h3 className="font-bold mb-2">Leaderboard</h3>
       {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
       <table className="w-full text-left">
