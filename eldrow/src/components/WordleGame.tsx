@@ -94,7 +94,7 @@ export default function WordleGame() {
   }, [refreshStatus]);
 
   // Switch to Base network
-  const switchToBase = async () => {
+  const _switchToBase = async () => {
     try {
       await (globalThis.window as any)?.ethereum?.request?.({
         method: 'wallet_switchEthereumChain',
