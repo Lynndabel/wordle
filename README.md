@@ -20,3 +20,13 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
 
 ---
 
+## Features
+
+- **Daily Wordle Gameplay** – Deterministic daily words with familiar guess feedback and shareable results.@src/components/WordleGame.tsx#1-264 @src/lib/dailyWord.ts#1-12
+- **On-chain Streak Tracking** – Reads and writes streak data to a Base mainnet contract via ethers.js helpers.@src/components/WordleGame.tsx#68-169 @src/lib/wordleStreakContract.ts#1-110
+- **Farcaster & Neynar Integration** – Supports Neynar sign-in, session management, and Farcaster mini app context (including cast actions and notifications).@src/components/App.tsx#1-118 @src/auth.ts#217-365 @src/components/ui/NeynarAuthButton/index.tsx#1-720
+- **Wallet Awareness** – Detects injected wallets, guides users to connect, and ensures play happens on Base.@src/components/WordleGame.tsx#37-168 @src/lib/WalletContext.tsx#1-98
+- **Mini App Scaffold** – Tabbed UI, Safe-area aware layout, and provider wrappers for Wagmi, Neynar, and AuthKit.@src/components/App.tsx#1-118 @src/app/app.tsx#1-15 @src/app/providers.tsx#1-39 @src/app/providers.NeynarAuth.tsx#1-44
+
+---
+
