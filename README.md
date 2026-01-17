@@ -137,3 +137,16 @@ Key entry points:
 
 ---
 
+## Authentication & Neynar Flow
+
+1. Users initiate sign-in via the Neynar Auth button.
+2. Mini app contexts leverage `@neynar/react` to detect platform state and request signed nonces.
+3. The button fetches/creates signer keys, polls for approvals, and persists sessions via NextAuth credentials provider.@src/components/ui/NeynarAuthButton/index.tsx#1-556 @src/auth.ts#217-365
+4. Web contexts can store signer data in `localStorage`, while mini app contexts sync signers into the server session.
+5. API routes under `src/app/api/auth/*` expose nonce generation, signer registration, and validation endpoints consumed during the flow.@src/app/api/auth/nonce/route.ts @src/app/api/auth/signer/route.ts (see directory)
+
+To enable the full SIWN experience, provide `SEED_PHRASE`, `NEYNAR_API_KEY`, `NEYNAR_CLIENT_ID`, `NEXTAUTH_SECRET`, and `NEXTAUTH_URL`.
+
+---
+
+#
