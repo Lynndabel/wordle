@@ -42,4 +42,18 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
 
 ---
 
-#
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** ≥ 18.18 (Next.js 15 requirement). Node 20.x is recommended.
+- **npm** (bundled with Node). Yarn or pnpm will work, but the repo ships with `package-lock.json`.
+
+### Installation
+
+```bash
+git clone <your-fork-or-clone-url>
+cd eldrow
+npm install
+```
+
