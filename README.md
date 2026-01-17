@@ -6,17 +6,15 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Tech Stack](#tech-stack)
-3. [Getting Started](#getting-started)
-4. [Environment Variables](#environment-variables)
-5. [Available Scripts](#available-scripts)
-6. [Project Structure](#project-structure)
-7. [Authentication & Neynar Flow](#authentication--neynar-flow)
-8. [Smart Contract & Streak Tracking](#smart-contract--streak-tracking)
-9. [Deployment](#deployment)
-10. [Troubleshooting](#troubleshooting)
-11. [License](#license)
+- [Table of Contents](#table-of-contents)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Local Development](#local-development)
+  - [Production Build Preview](#production-build-preview)
+- [Environment Variables](#environment-variables)
 
 ---
 
@@ -74,6 +72,26 @@ npm install
 npm run build
 npm start
 ```
+
+---
+
+## Environment Variables
+
+Create a `.env.local` file in the project root. The following values enable the full feature set:
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `NEXT_PUBLIC_URL` | ✅ (all builds) | Base URL for the app. Use `http://localhost:3000` for local dev. Powers metadata and notification links.@src/lib/constants.ts#19-63 |
+| `NEYNAR_API_KEY` | ✅ for Neynar features | Required to fetch user data, send notifications, and verify app keys via Neynar APIs.@src/app/api/users/route.ts#1-39 @src/lib/neynar.ts#1-76 |
+| `NEYNAR_CLIENT_ID` | ✅ for Neynar features | Enables Neynar-managed webhooks and mini app notifications.@src/app/api/send-notification/route.ts#13-57 @src/app/api/webhook/route.ts#14-20 |
+| `NEXTAUTH_SECRET` | ✅ when SIWN is enabled | Secret used by NextAuth for session encryption.@src/auth.ts#217-365 |
+| `NEXTAUTH_URL` | ✅ in production | Fully qualified URL where NextAuth is hosted (e.g., `https://your-domain.com`).@src/auth.ts#272-311 |
+| `SEED_PHRASE` | Optional (SIWN) | Custody account seed phrase to register and sponsor signers. Required for Sign-In with Neynar flow.@src/app/api/auth/signer/signed_key/route.ts#33-90 |
+| `SPONSOR_SIGNER` | Optional (SIWN) | Set to `true` to sponsor signer creation through Neynar.@src/app/api/auth/signer/signed_key/route.ts#33-80 |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Optional | Configure Upstash Redis for storing notification preferences; falls back to in-memory storage if omitted.@src/lib/kv.ts#1-29 |
+| `SOLANA_RPC_ENDPOINT` | Optional | Override the default public Solana RPC used by the Solana provider wrappers.@src/app/providers.tsx#17-37 |
+
+> ℹ️ The project includes helper scripts (`scripts/dev.js`, `scripts/deploy.ts`) that load `.env.local` automatically when available.
 
 ---
 
