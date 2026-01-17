@@ -30,3 +30,16 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
 
 ---
 
+## Tech Stack
+
+- [Next.js 15](https://nextjs.org/) with the App Router
+- React 19 with TypeScript and modern ESLint configuration
+- Tailwind CSS (via twin utilities) and Radix UI primitives
+- Neynar React SDK, Farcaster Mini App SDK, and Auth Kit
+- NextAuth credential-based flow for Sign-In with Neynar
+- ethers.js + Wagmi for on-chain reads/writes
+- Optional Upstash Redis for persisting mini app notification preferences
+
+---
+
+#
