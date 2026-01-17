@@ -19,6 +19,8 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
 - [Project Structure](#project-structure)
 - [Authentication \& Neynar Flow](#authentication--neynar-flow)
 - [Smart Contract \& Streak Tracking](#smart-contract--streak-tracking)
+- [Deployment](#deployment)
+  - [Vercel (Recommended)](#vercel-recommended)
 
 ---
 
@@ -162,4 +164,12 @@ The Wordle streak contract lives on Base mainnet at `0x1bb2101D0eF3C81a892457C55
 > You can substitute your own contract by updating `CONTRACT_ADDRESS` and ABI in `src/lib/wordleStreakContract.ts`.
 
 ---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Ensure production env vars are configured in Vercel (see [Environment Variables](#environment-variables)).
+2. Run `npm run deploy:vercel` and follow the prompts. The script can sync `.env.local` values into `.env` and configure Vercel using `@vercel/sdk` utilities.@scripts/deploy.ts#15-810
+3. Alternatively, push to a connected Git repository and let Vercel build automatically. Keep `NEXTAUTH_URL` in sync with the deployed domain.
 
