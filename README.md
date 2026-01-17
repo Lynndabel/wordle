@@ -57,3 +57,23 @@ cd eldrow
 npm install
 ```
 
+### Local Development
+
+1. Configure environment variables (see [Environment Variables](#environment-variables)).
+2. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+3. Open `http://localhost:3000` in a browser. The dev script automatically loads `.env.local` and proxies the Next.js dev server.
+
+### Production Build Preview
+
+```bash
+npm run build
+npm start
+```
+
+---
+
