@@ -16,6 +16,7 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
   - [Production Build Preview](#production-build-preview)
 - [Environment Variables](#environment-variables)
 - [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
 
 ---
 
@@ -107,6 +108,32 @@ Create a `.env.local` file in the project root. The following values enable the 
 | `npm run deploy:vercel` | Interactive deploy helper that prepares env vars and triggers a Vercel deployment through the SDK.@package.json#20 @scripts/deploy.ts#15-810 |
 | `npm run deploy:raw` | Shortcut to `vercel --prod` if you prefer manual control.@package.json#21 |
 | `npm run cleanup` | Invokes the generated cleanup script to prune scaffold artifacts.@package.json#22 @scripts/cleanup.js#1-1264 |
+
+---
+
+## Project Structure
+
+```
+eldrow/
+├── public/                # Static assets (icon, splash, OG image, etc.)
+├── src/
+│   ├── app/               # Next.js App Router entrypoints and providers
+│   ├── components/        # UI components (Wordle game, leaderboard, tabs, buttons)
+│   ├── hooks/             # Custom hooks (e.g., useNeynarUser)
+│   ├── lib/               # Helpers (constants, Neynar client, streak contract)
+│   └── app/api/           # Server routes for auth, Neynar APIs, notifications
+├── scripts/               # Dev/deploy helper scripts
+├── bin/                   # Scaffold initialization utilities
+└── README.md
+```
+
+Key entry points:
+
+- `src/app/page.tsx` – App shell and metadata.
+- `src/components/App.tsx` – Mini app layout, navigation tabs, safe-area handling.
+- `src/components/WordleGame.tsx` – Core gameplay loop and Base network interactions.
+- `src/components/ui/NeynarAuthButton` – Auth flow UI for web and mini app contexts.
+- `src/auth.ts` – NextAuth configuration for Sign-In with Neynar.
 
 ---
 
