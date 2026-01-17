@@ -15,6 +15,7 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
   - [Local Development](#local-development)
   - [Production Build Preview](#production-build-preview)
 - [Environment Variables](#environment-variables)
+- [Available Scripts](#available-scripts)
 
 ---
 
@@ -92,6 +93,20 @@ Create a `.env.local` file in the project root. The following values enable the 
 | `SOLANA_RPC_ENDPOINT` | Optional | Override the default public Solana RPC used by the Solana provider wrappers.@src/app/providers.tsx#17-37 |
 
 > ℹ️ The project includes helper scripts (`scripts/dev.js`, `scripts/deploy.ts`) that load `.env.local` automatically when available.
+
+---
+
+## Available Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Starts the dev server with environment bootstrapping and port management.@package.json#15-23 |
+| `npm run build` / `npm run build:raw` | Generates an optimized production build.@package.json#15-23 |
+| `npm start` | Serves the production build locally via `next start`.@package.json#18 |
+| `npm run lint` | Runs the configured ESLint rules (Next.js preset).@package.json#19 |
+| `npm run deploy:vercel` | Interactive deploy helper that prepares env vars and triggers a Vercel deployment through the SDK.@package.json#20 @scripts/deploy.ts#15-810 |
+| `npm run deploy:raw` | Shortcut to `vercel --prod` if you prefer manual control.@package.json#21 |
+| `npm run cleanup` | Invokes the generated cleanup script to prune scaffold artifacts.@package.json#22 @scripts/cleanup.js#1-1264 |
 
 ---
 
