@@ -188,7 +188,7 @@ The Wordle streak contract lives on Base mainnet at `0x1bb2101D0eF3C81a892457C55
 - **`NEXT_PUBLIC_URL` undefined** – This value is required; Next.js will crash if it is missing because constants reference it directly.
 - **Neynar API errors** – Confirm `NEYNAR_API_KEY`/`NEYNAR_CLIENT_ID` are valid and that the requesting user/app has correct permissions.
 - **Signer registration failures** – The SIWN flow requires a valid custody account seed phrase. Double-check `SEED_PHRASE` and optional `SPONSOR_SIGNER` flag.
-- **Wallet connection issues** – Users must have an injected EVM wallet (e.g., MetaMask). The UI alerts if no accounts are available.@src/lib/WalletContext.tsx#1-88
+- **Wallet connection issues** – Users must have an injected EVM wallet (e.g., MetaMask). The UI alerts if no accounts are available.
 
 ---
 
