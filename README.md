@@ -17,6 +17,8 @@ Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle
 - [Environment Variables](#environment-variables)
 - [Available Scripts](#available-scripts)
 - [Project Structure](#project-structure)
+- [Authentication \& Neynar Flow](#authentication--neynar-flow)
+- [Smart Contract \& Streak Tracking](#smart-contract--streak-tracking)
 
 ---
 
@@ -149,4 +151,15 @@ To enable the full SIWN experience, provide `SEED_PHRASE`, `NEYNAR_API_KEY`, `NE
 
 ---
 
-#
+## Smart Contract & Streak Tracking
+
+The Wordle streak contract lives on Base mainnet at `0x1bb2101D0eF3C81a892457C55C123A09602855A0`. Game actions:
+
+1. On every guess, Eldrow checks `guessesLeft`, `hasWonToday`, and current streak values via read-only calls.
+2. When the puzzle concludes, the client calls `guessToday` with the final result, updating the on-chain streak and emitting events.
+3. `refreshStatus` refetches streak data after transactions settle to keep the UI in sync.@src/components/WordleGame.tsx#68-169 @src/lib/wordleStreakContract.ts#1-110
+
+> You can substitute your own contract by updating `CONTRACT_ADDRESS` and ABI in `src/lib/wordleStreakContract.ts`.
+
+---
+
