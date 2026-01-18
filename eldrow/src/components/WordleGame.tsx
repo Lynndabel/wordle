@@ -246,7 +246,7 @@ export default function WordleGame() {
             if (castActions?.cast) {
               const resultMsg = status === 'won'
                 ? `I solved today's Wordle! My streak: ${streak?.current || 1}`
-                : `Tried today's Wordle. The word was ${DAILY_WORD}. Try to beat my streak!`;
+                : `I tried today's Wordle. The word was ${DAILY_WORD}. Try to beat my streak!`;
               await castActions.cast({ text: resultMsg });
             } else if ((globalThis.window as any)?.farcaster) {
               // fallback: try window.farcaster if available

@@ -13,8 +13,8 @@
 - [ ] Display streaks and user progress
 
 ### 3. Farcaster Integration
-- [ ] Farcaster authentication (Neynar/SDK)
-- [ ] (Optional) Share results or streaks to Farcaster
+- ( [ ] Farcaster authentication (Neynar/SDK) )
+- ( [ ] Share results or streaks to Farcaster )
 
 ### 4. UI/UX
 - [ ] Responsive and mobile-friendly UI
