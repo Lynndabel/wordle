@@ -200,7 +200,7 @@ export function ActionsTab() {
           <option value={'rigid'}>Rigid</option>
         </select>
         <Button onClick={triggerHapticFeedback} className="w-full">
-          Trigger Haptic Feedback
+          Trigger Haptic Feedback!
         </Button>
       </div>
     </div>

@@ -8,7 +8,7 @@
 - [x] Word list management (daily rotation)
 
 ### 2. Streak & User Tracking
-- [ ] Onchain streak tracking smart contract (Base)
+- [x ] Onchain streak tracking smart contract (Base)
 - [ ] Integrate wallet and contract interaction in frontend
 - [ ] Display streaks and user progress
 
