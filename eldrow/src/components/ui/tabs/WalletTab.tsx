@@ -65,9 +65,10 @@ interface ConnectionControlsProps {
     user?: { fid?: number };
     client?: unknown;
   } | null;
-  connect: (args: { connector: Connector }) => void;
-  connectors: readonly Connector[];
   disconnect: () => void;
+  onConnectFarcaster?: () => void;
+  onConnectCoinbase?: () => void;
+  onConnectMetaMask?: () => void;
 }
 
 /**
@@ -76,9 +77,10 @@ interface ConnectionControlsProps {
 function ConnectionControls({
   isConnected,
   context,
-  connect,
-  connectors,
   disconnect,
+  onConnectFarcaster,
+  onConnectCoinbase,
+  onConnectMetaMask,
 }: ConnectionControlsProps) {
   if (isConnected) {
     return (
@@ -87,31 +89,31 @@ function ConnectionControls({
       </Button>
     );
   }
-  if (context) {
+
+  if (context && onConnectFarcaster) {
     return (
       <div className="space-y-2 w-full">
-        <Button onClick={() => connect({ connector: connectors[0] })} className="w-full">
-          Connect (Auto)
-        </Button>
-        <Button
-          onClick={() => {
-            console.log("Manual Farcaster connection attempt");
-            console.log("Connectors:", connectors.map((c, i) => `${i}: ${c.name}`));
-            connect({ connector: connectors[0] });
-          }}
-          className="w-full"
-        >
-          Connect Farcaster (Manual)
+        <Button onClick={onConnectFarcaster} className="w-full">
+          Connect Farcaster Wallet
         </Button>
       </div>
     );
   }
+
   return (
     <div className="space-y-3 w-full">
-      <Button onClick={() => connect({ connector: connectors[1] })} className="w-full">
+      <Button
+        onClick={onConnectCoinbase}
+        disabled={!onConnectCoinbase}
+        className="w-full"
+      >
         Connect Coinbase Wallet
       </Button>
-      <Button onClick={() => connect({ connector: connectors[2] })} className="w-full">
+      <Button
+        onClick={onConnectMetaMask}
+        disabled={!onConnectMetaMask}
+        className="w-full"
+      >
         Connect MetaMask
       </Button>
     </div>
@@ -167,24 +169,52 @@ export function WalletTab() {
    * and automatically attempts to connect using the Farcaster Frame connector.
    * It includes comprehensive logging for debugging connection issues.
    */
+  const farcasterConnector = useMemo(
+    () => connectors.find((connector) => connector.id === 'farcasterFrame' || connector.name.toLowerCase().includes('farcaster')),
+    [connectors]
+  );
+
+  const coinbaseConnector = useMemo(
+    () => connectors.find((connector) => connector.id === 'coinbaseWalletSDK' || connector.name.toLowerCase().includes('coinbase')),
+    [connectors]
+  );
+
+  const metaMaskConnector = useMemo(
+    () => connectors.find((connector) => connector.id === 'metaMask' || connector.name.toLowerCase().includes('metamask')),
+    [connectors]
+  );
+
+  const connectWith = useCallback(
+    (connector?: Connector) => {
+      if (!connector) {
+        console.warn('Requested connector is unavailable.');
+        return;
+      }
+      connect({ connector });
+    },
+    [connect]
+  );
+
+  const handleConnectFarcaster = useCallback(() => connectWith(farcasterConnector), [connectWith, farcasterConnector]);
+  const handleConnectCoinbase = useCallback(() => connectWith(coinbaseConnector), [connectWith, coinbaseConnector]);
+  const handleConnectMetaMask = useCallback(() => connectWith(metaMaskConnector), [connectWith, metaMaskConnector]);
+
   useEffect(() => {
     // Check if we're in a Farcaster client environment
-    const isInFarcasterClient = typeof window !== 'undefined' && 
-      (window.location.href.includes('warpcast.com') || 
-       window.location.href.includes('farcaster') ||
-       window.ethereum?.isFarcaster ||
-       context?.client);
-    
-    if (context?.user?.fid && !isConnected && connectors.length > 0 && isInFarcasterClient) {
+    const isInFarcasterClient = typeof window !== 'undefined' &&
+      (window.location.href.includes('warpcast.com') ||
+        window.location.href.includes('farcaster') ||
+        (window as any).ethereum?.isFarcaster ||
+        context?.client);
+
+    if (context?.user?.fid && !isConnected && farcasterConnector && isInFarcasterClient) {
       console.log("Attempting auto-connection with Farcaster context...");
       console.log("- User FID:", context.user.fid);
-      console.log("- Available connectors:", connectors.map((c, i) => `${i}: ${c.name}`));
-      console.log("- Using connector:", connectors[0].name);
+      console.log("- Using connector:", farcasterConnector.name);
       console.log("- In Farcaster client:", isInFarcasterClient);
-      
-      // Use the first connector (farcasterFrame) for auto-connection
+
       try {
-        connect({ connector: connectors[0] });
+        connect({ connector: farcasterConnector });
       } catch (error) {
         console.error("Auto-connection failed:", error);
       }
@@ -192,10 +222,10 @@ export function WalletTab() {
       console.log("Auto-connection conditions not met:");
       console.log("- Has context:", !!context?.user?.fid);
       console.log("- Is connected:", isConnected);
-      console.log("- Has connectors:", connectors.length > 0);
+      console.log("- Has Farcaster connector:", !!farcasterConnector);
       console.log("- In Farcaster client:", isInFarcasterClient);
     }
-  }, [context?.user?.fid, isConnected, connectors, connect, context?.client]);
+  }, [context?.user?.fid, isConnected, farcasterConnector, connect, context?.client]);
 
   // --- Computed Values ---
   /**
@@ -284,9 +314,10 @@ export function WalletTab() {
       <ConnectionControls
         isConnected={isConnected}
         context={context}
-        connect={connect}
-        connectors={connectors}
         disconnect={disconnect}
+        onConnectFarcaster={farcasterConnector ? handleConnectFarcaster : undefined}
+        onConnectCoinbase={coinbaseConnector ? handleConnectCoinbase : undefined}
+        onConnectMetaMask={metaMaskConnector ? handleConnectMetaMask : undefined}
       />
 
       {/* EVM Wallet Components */}

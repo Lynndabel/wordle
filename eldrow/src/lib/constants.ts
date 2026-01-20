@@ -1,5 +1,15 @@
 import { type AccountAssociation } from '@farcaster/miniapp-core/src/manifest';
 
+const getRequiredEnv = (key: string): string => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(
+      `Missing required environment variable "${key}". Please set it in your environment configuration.`
+    );
+  }
+  return value;
+};
+
 /**
  * Application constants and configuration values.
  *
@@ -16,7 +26,7 @@ import { type AccountAssociation } from '@farcaster/miniapp-core/src/manifest';
  * The base URL of the application.
  * Used for generating absolute URLs for assets and API endpoints.
  */
-export const APP_URL: string = process.env.NEXT_PUBLIC_URL!;
+export const APP_URL: string = getRequiredEnv('NEXT_PUBLIC_URL');
 
 /**
  * The name of the mini app as displayed to users.

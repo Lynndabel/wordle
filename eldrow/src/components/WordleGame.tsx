@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 
-import { getDailyWord } from "../lib/dailyWord";
+import { getDailyWord, WORD_LENGTH } from "../lib/dailyWord";
 
-const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 const DAILY_WORD = getDailyWord();
+
+if (DAILY_WORD.length !== WORD_LENGTH) {
+  throw new Error(
+    `Daily word length mismatch: expected ${WORD_LENGTH}, got ${DAILY_WORD.length}.`
+  );
+}
 
 function getFeedback(guess: string, answer: string): Array<'green' | 'yellow' | 'gray'> {
   const feedback: Array<'green' | 'yellow' | 'gray'> = new Array(WORD_LENGTH).fill('gray');
@@ -49,6 +54,7 @@ export default function WordleGame() {
   const [guessesLeft, setGuessesLeft] = useState<number | null>(null);
   const [wonToday, setWonToday] = useState<boolean>(false);
   const [isOnBase, setIsOnBase] = useState<boolean>(true);
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
 
 
   // Stable keys for rows and cells to avoid using array indices as React keys
@@ -94,18 +100,26 @@ export default function WordleGame() {
   }, [refreshStatus]);
 
   // Switch to Base network
-  const _switchToBase = async () => {
+  const switchToBase = React.useCallback(async () => {
+    if (!(globalThis.window as any)?.ethereum) {
+      setTxStatus('No Ethereum provider detected. Please open in a wallet-enabled browser.');
+      return;
+    }
+
+    setIsSwitchingNetwork(true);
+    setTxStatus('Switching network to Base...');
+
     try {
-      await (globalThis.window as any)?.ethereum?.request?.({
+      await (globalThis.window as any).ethereum.request?.({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x2105' }], // 8453
       });
       await refreshStatus();
+      setTxStatus('Switched to Base.');
     } catch (err: any) {
-      // If the chain is not added, request add
       if (err?.code === 4902) {
         try {
-          await (globalThis.window as any)?.ethereum?.request?.({
+          await (globalThis.window as any).ethereum.request?.({
             method: 'wallet_addEthereumChain',
             params: [{
               chainId: '0x2105',
@@ -116,12 +130,18 @@ export default function WordleGame() {
             }],
           });
           await refreshStatus();
-        } catch (e) {
-          console.error('add chain failed', e);
+          setTxStatus('Base network added. Please confirm the switch in your wallet if prompted.');
+        } catch (addError) {
+          console.error('add chain failed', addError);
+          setTxStatus('Failed to add Base network. Please add it manually.');
         }
+      } else {
+        setTxStatus('Failed to switch to Base. Please check your wallet.');
       }
+    } finally {
+      setIsSwitchingNetwork(false);
     }
-  };
+  }, [refreshStatus]);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentGuess(e.target.value.toUpperCase());
@@ -145,7 +165,10 @@ export default function WordleGame() {
 
   const handleGuess = async () => {
     if (currentGuess.length !== WORD_LENGTH) return;
-    if (!isOnBase) return; // guard
+    if (!isOnBase) {
+      setTxStatus('Please switch to the Base network to submit guesses.');
+      return;
+    }
     if (wonToday) return;  // already won today
     if (guessesLeft !== null && guessesLeft <= 0) return; // no attempts left
     const newGuesses = [...guesses, currentGuess];
@@ -229,10 +252,22 @@ export default function WordleGame() {
           />
           <button
             onClick={handleGuess}
-            disabled={currentGuess.length !== WORD_LENGTH}
+            disabled={currentGuess.length !== WORD_LENGTH || !isOnBase}
             className="bg-blue-600 text-white px-4 py-1 rounded disabled:opacity-50"
           >
             Guess
+          </button>
+        </div>
+      )}
+      {account && !isOnBase && (
+        <div className="mb-3 text-sm text-orange-600 flex flex-col items-center space-y-2">
+          <span>You are connected to the wrong network. Switch to Base to continue playing.</span>
+          <button
+            onClick={switchToBase}
+            disabled={isSwitchingNetwork}
+            className="px-3 py-1 rounded bg-orange-500 text-white disabled:opacity-50"
+          >
+            {isSwitchingNetwork ? 'Switching...' : 'Switch to Base'}
           </button>
         </div>
       )}
