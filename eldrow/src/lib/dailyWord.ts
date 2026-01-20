@@ -12,14 +12,14 @@ const RAW_WORD_LIST = [
   "PLUSH",
   "TRAIL",
   "CROWN",
-  "LOOM",
+  "BASES",
   "SOLVE",
   "FRAME",
   "CHAIN",
   "TOKEN",
   "MINER",
-  "REWAR",
   "BOOST",
+  "SCORE",
 ];
 
 const WORD_LIST = RAW_WORD_LIST.map((word) => word.trim().toUpperCase());
