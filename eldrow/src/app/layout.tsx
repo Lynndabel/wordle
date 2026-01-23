@@ -5,7 +5,7 @@ import { Providers } from '~/app/providers';
 import { APP_NAME, APP_DESCRIPTION } from '~/lib/constants';
 
 export const metadata: Metadata = {
-  title: APP_NAME,
+  title: ELDROW,
   description: APP_DESCRIPTION,
 };
 
