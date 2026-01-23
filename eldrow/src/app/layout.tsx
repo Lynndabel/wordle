@@ -6,7 +6,7 @@ import { APP_NAME, APP_DESCRIPTION } from '~/lib/constants';
 
 export const metadata: Metadata = {
   title: ELDROW,
-  description: This is a wordle game built on farcaster,
+  description: This is a wordle game built on farcaster, that allow players earn
 };
 
 export default async function RootLayout({
