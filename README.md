@@ -1,4 +1,4 @@
- Eldrow
+ Eldrow which is Wordle spelt backward
 
 Eldrow is a Wordle-inspired Farcaster mini app that combines a daily word puzzle with on-chain streak tracking, Neynar authentication, and wallet-aware gameplay. The project ships with a fully configured Next.js 15 application, reusable UI primitives, and integration helpers for building richer Farcaster experiences.
 
